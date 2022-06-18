@@ -390,17 +390,6 @@ public class NametagHandler implements Listener {
             public void run() {
                 nametagManager.setNametag(player.getName(), formatWithPlaceholders(player, nametag.getPrefix(), true),
                         formatWithPlaceholders(player, nametag.getSuffix(), true), nametag.getSortPriority());
-                // If the TabList is disabled...
-                if (!tabListEnabled) {
-                    // apply the default white username to the player.
-                    player.setPlayerListName(Utils.format("&f" + player.getPlayerListName()));
-                } else {
-                    if (longNametagsEnabled) {
-                        player.setPlayerListName(formatWithPlaceholders(player, nametag.getPrefix() + player.getName() + nametag.getSuffix(), false));
-                    } else {
-                        player.setPlayerListName(null);
-                    }
-                }
 
                 if (loggedIn) {
                     Bukkit.getPluginManager().callEvent(new NametagFirstLoadedEvent(player, nametag));
@@ -454,8 +443,12 @@ public class NametagHandler implements Listener {
         save(null, targetName, changeType, value);
     }
 
-    // Reduces checks to have this method (ie not saving data twice)
     public void save(String targetName, String prefix, String suffix) {
+        save(targetName, prefix, suffix, -1);
+    }
+
+    // Reduces checks to have this method (ie not saving data twice)
+    public void save(String targetName, String prefix, String suffix, int priority) {
         Player player = Bukkit.getPlayerExact(targetName);
 
         PlayerData data = getPlayerData(player);
@@ -468,6 +461,9 @@ public class NametagHandler implements Listener {
 
         data.setPrefix(prefix);
         data.setSuffix(suffix);
+        if (priority != -1) {
+            data.setSortPriority(priority);
+        }
 
         if (player != null) {
             applyTagToPlayer(player, false);
